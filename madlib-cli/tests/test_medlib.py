@@ -1,55 +1,59 @@
-"""Tests for input/output of madlib.py."""
-import madlib
 import pytest
-import sys
+from madlib import read_template, parse_template, merge
 
 
-def test_read_file_exists():
-    """Test whether the read_file function exists."""
-    assert madlib.read_file
+def test_read_template_returns_stripped_string():
+    actual = read_template("assets/dark_and_stormy_night_template.txt")
+    expected = "It was a {Adjective} and {Adjective} {Noun}."
+    assert actual == expected
 
 
-def test_write_file():
-    """Test whether write_file works properly."""
-    madlib.write_file('../madlibCli/foo.txt', 'foo')
+#@pytest.mark.skip("pending")
+def test_parse_template():
+    actual_stripped, actual_parts = parse_template(
+        "It was a {Adjective} and {Adjective} {Noun}."
+    )
+    expected_stripped = "It was a {} and {} {}."
+    expected_parts = ("Adjective", "Adjective", "Noun")
 
-    with open('../madlibCli/foo.txt') as f:
-        assert f.read() == 'foo'
-
-
-def test_get_keys():
-    """Tests whether get_keys can get parts of speech from simple input."""
-    raw = 'It was a {Adjective} and {Adjective} {Noun}'
-    expected = ['Adjective', 'Adjective', 'Noun']
-    assert madlib.get_keys(raw) == expected
+    assert actual_stripped == expected_stripped
+    assert actual_parts == expected_parts
 
 
-def test_remove_keys():
-    """Tests the removal of keys from a given string."""
-    raw = 'It was a {Adjective} and {Adjective} {Noun}'
-    expected = 'It was a {} and {} {}'
-    assert madlib.remove_keys(raw) == expected
+#@pytest.mark.skip("pending")
+def test_merge():
+    actual = merge("It was a {} and {} {}.", ("dark", "stormy", "night"))
+    expected = "It was a dark and stormy night."
+    assert actual == expected
+
+
+#@pytest.mark.skip("pending")
+def test_read_template_raises_exception_with_bad_path():
+
+    with pytest.raises(FileNotFoundError):
+        path = "missing.txt"
+        read_template(path)
 
 
 def test_parse():
-    """Test whether parse works with simple input."""
-    prompts, stripped = madlib.parse(
-        'It was a {Adjective} and {Adjective} {Noun}')
-    assert prompts == ['Adjective', 'Adjective', 'Noun']
-    assert stripped == 'It was a {} and {} {}'
+    actual_stripped, actual_parts = parse_template(
+        "I the {Adjective} and {Adjective} {A First Name} have {Past Tense Verb} {A First Name}'s {Adjective} sister and plan to steal her {Adjective} {Plural Noun}!"
+    )
+    expected_stripped = "I the {} and {} {} have {} {}'s {} sister and plan to steal her {} {}!"
+    expected_parts = ("Adjective", "Adjective", "A First Name", "Past Tense Verb", "A First Name", "Adjective", "Adjective", "Plural Noun")
+
+    assert actual_stripped == expected_stripped
+    assert actual_parts == expected_parts
 
 
-def test_output_story():
-    """Test whether story output is well-formed."""
-    raw = 'It was a {Adjective} and {Adjective} {Noun}'
 
-    input_values = iter(['dark', 'stormy', 'night'])
+#@pytest.mark.skip("pending")
+def test_parse2():
+    actual_stripped, actual_parts = parse_template(
+        "What are a {Large Animal} and backpacking {Small Animal} to do? Before you can help {A Girl's Name}, you'll have to collect the {Adjective} {Plural Noun} and {Adjective} {Plural Noun} that open up the {Number 1-50} worlds connected to A {First Name}'s Lair. There are {Number} {Plural Noun} and {Number} {Plural Noun} in the game, along with hundreds of other goodies for you to find."
+    )
+    expected_stripped = "What are a {} and backpacking {} to do? Before you can help {}, you'll have to collect the {} {} and {} {} that open up the {} worlds connected to A {}'s Lair. There are {} {} and {} {} in the game, along with hundreds of other goodies for you to find."
+    expected_parts = ('Large Animal', 'Small Animal', "A Girl's Name", 'Adjective', 'Plural Noun', 'Adjective', 'Plural Noun', 'Number 1-50', 'First Name', 'Number', 'Plural Noun', 'Number', 'Plural Noun')
 
-    def mock_input(s):
-        return next(input_values)
-
-    madlib.input = mock_input
-
-    story = madlib.output_story(raw)
-
-    assert story == 'It was a dark and stormy night'
+    assert actual_stripped == expected_stripped
+    assert actual_parts == expected_parts
