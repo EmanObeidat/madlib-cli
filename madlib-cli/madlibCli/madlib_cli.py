@@ -42,7 +42,7 @@ def new_file(merged_template):
 
 if __name__ == "__main__":
     intro()
-    returned_content = read_template("../assests/file.txt")
+    returned_content = read_template("../assests/example.txt")
     stripped, parts = parse_template(returned_content)
     user_prompts = prompts(parts)
     merged_txt = merge(stripped, user_prompts)
